@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviewer Deux</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.18);
+    --text: #1a1a18;
+    --text-muted: #6b6b67;
+    --text-faint: #9a9a96;
+    --accent: #534AB7;
+    --accent-bg: #EEEDFE;
+    --accent-text: #3C3489;
+    --success-bg: #E1F5EE;
+    --success-text: #085041;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18;
+      --surface: #242422;
+      --border: rgba(255,255,255,0.1);
+      --border-strong: rgba(255,255,255,0.18);
+      --text: #f0efe8;
+      --text-muted: #9a9a96;
+      --text-faint: #6b6b67;
+      --accent: #7F77DD;
+      --accent-bg: #26215C;
+      --accent-text: #CECBF6;
+      --success-bg: #04342C;
+      --success-text: #9FE1CB;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    border-bottom: 0.5px solid var(--border);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+  }
+
+  .logo {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--accent-bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 600; color: var(--accent-text);
+    flex-shrink: 0;
+  }
+
+  header h1 { font-size: 16px; font-weight: 500; }
+  header p { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+  .badge {
+    margin-left: auto;
+    font-size: 11px; padding: 3px 10px;
+    border-radius: 99px;
+    background: var(--accent-bg); color: var(--accent-text);
+    border: 0.5px solid var(--accent-text);
+    opacity: 0.8;
+  }
+
+  main {
+    flex: 1;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .card-label {
+    font-size: 11px; font-weight: 500;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 220px;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: vertical;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    font-family: inherit;
+  }
+
+  textarea::placeholder { color: var(--text-faint); }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-top: 0.5px solid var(--border);
+    padding-top: 12px;
+    margin-top: 8px;
+  }
+
+  .char-count { font-size: 12px; color: var(--text-faint); }
+
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    padding: 8px 18px;
+    transition: opacity 0.15s, transform 0.1s;
+    border: none;
+  }
+
+  button:active { transform: scale(0.98); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 0.5px solid var(--border-strong);
+  }
+  .btn-ghost:hover { background: var(--border); }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 10px 1.25rem;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border-strong);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result-area { display: none; flex-direction: column; gap: 1rem; }
+  .result-area.visible { display: flex; }
+
+  .result-section {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .result-header:hover { background: var(--bg); }
+
+  .result-title {
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .result-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-purple { background: var(--accent); }
+  .dot-teal { background: #1D9E75; }
+
+  .chevron {
+    font-size: 12px;
+    color: var(--text-faint);
+    transition: transform 0.2s;
+  }
+  .chevron.open { transform: rotate(180deg); }
+
+  .result-body {
+    padding: 1.25rem;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    display: none;
+  }
+  .result-body.visible { display: block; }
+
+  .copy-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+    color: var(--text-muted);
+    background: transparent;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+  }
+  .copy-btn:hover { background: var(--bg); }
+
+  .success-notice {
+    background: var(--success-bg);
+    color: var(--success-text);
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    display: none;
+  }
+  .success-notice.visible { display: block; }
+
+  .error-notice {
+    background: #FCEBEB;
+    color: #791F1F;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    display: none;
+  }
+  .error-notice.visible { display: block; }
+
+  @media (prefers-color-scheme: dark) {
+    .error-notice { background: #501313; color: #F7C1C1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">R2</div>
+  <div>
+    <h1>Reviewer Deux</h1>
+    <p>Correction et révision d'articles scientifiques</p>
+  </div>
+  <span class="badge">Claude Sonnet 4.6</span>
+</header>
+
+<main>
+
+  <div class="card">
+    <div class="card-label">Texte à réviser</div>
+    <textarea id="input-text" placeholder="Collez ici le texte à corriger — paragraphe, section ou article complet…" oninput="updateCount()"></textarea>
+    <div class="toolbar">
+      <span class="char-count" id="char-count">0 caractère</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-ghost" onclick="clearAll()">Effacer</button>
+        <button class="btn-primary" id="submit-btn" onclick="submitText()">Réviser le texte →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="status" class="status-bar" style="display:none;">
+    <div class="spinner"></div>
+    <span id="status-text">Analyse en cours…</span>
+  </div>
+
+  <div id="error" class="error-notice"></div>
+
+  <div class="result-area" id="result-area">
+
+    <div class="success-notice visible" id="success-notice">
+      Révision terminée. Consultez le texte corrigé et le rapport ci-dessous.
+    </div>
+
+    <div class="result-section">
+      <div class="result-header" onclick="toggleSection('corrected')">
+        <div class="result-title">
+          <span class="result-dot dot-purple"></span>
+          Texte corrigé
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="copy-btn" onclick="copySection(event, 'corrected-body')">Copier</button>
+          <span class="chevron open" id="chevron-corrected">▾</span>
+        </div>
+      </div>
+      <div class="result-body visible" id="corrected-body"></div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-header" onclick="toggleSection('report')">
+        <div class="result-title">
+          <span class="result-dot dot-teal"></span>
+          Rapport de correction
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="copy-btn" onclick="copySection(event, 'report-body')">Copier</button>
+          <span class="chevron open" id="chevron-report">▾</span>
+        </div>
+      </div>
+      <div class="result-body visible" id="report-body"></div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+const SYSTEM_PROMPT = `# Prompt : Correction d'un article scientifique
+
+## Rôle
+Tu es un rédacteur et réviseur scientifique expert. Ton rôle est de corriger le texte soumis ci-dessous en appliquant rigoureusement les règles de l'écriture scientifique énoncées dans ce prompt. Tu produis une **version corrigée complète** du texte, suivie d'un **rapport de correction** structuré.
+
+## Consignes de correction
+
+### 1. Structure AIMRD et paragraphes pivots
+Vérifier et corriger les éléments suivants si le texte soumis est un article complet ou une section identifiable :
+
+| Paragraphe pivot | Ce qui doit être présent |
+|---|---|
+| 1er § introduction | Grande question universelle du domaine ; contexte et lacunes de la littérature |
+| Dernier § introduction | Objectif ou hypothèse précis, sans mention des méthodes |
+| 1er § discussion | Synthèse des 2–3 résultats clés en termes disciplinaires, sans jargon statistique |
+| Dernier § discussion | Retour à la grande question ; déclaration de nouveauté |
+| Abstract | Contexte → méthodes → résultats → conclusion percutante |
+
+Si le texte soumis n'est qu'un fragment (un ou plusieurs paragraphes), appliquer uniquement les règles pertinentes à ce fragment.
+
+### 2. Structure des paragraphes
+Pour chaque paragraphe, vérifier et corriger :
+- **Phrase-topic** : est-elle en première position ? Exprime-t-elle clairement l'idée directrice ?
+- **Corps** : les preuves sont-elles spécifiques ? Éviter les généralisations vagues.
+- **Analyse** : chaque preuve est-elle suivie d'une explication de sa pertinence ?
+- **Phrase de clôture** : assure-t-elle le lien avec la thèse générale ou la transition ?
+- **Longueur** : subdiviser si trop long, développer ou fusionner si trop court.
+
+### 3. Intégration des preuves et citations
+- Toute citation ou donnée non introduite → ajouter une phrase d'introduction
+- Toute citation ou donnée sans analyse → ajouter une phrase d'analyse
+- Verbes d'attribution répétitifs → les remplacer par des verbes précis (rapporte, démontre, soutient, conteste, propose, corrobore…)
+- Citations directes longues et non indispensables → les convertir en paraphrases
+
+### 4. Conclusion
+Si le texte contient une conclusion, vérifier :
+- Présence d'une synthèse globale en ouverture
+- Présence d'un paragraphe sur la portée, les limites et les pistes futures
+- Cohérence narrative avec l'abstract et l'introduction
+- Absence de fusion injustifiée avec la discussion
+
+### 5. Élimination des marqueurs linguistiques typiques des textes générés par IA
+
+Identifier et remplacer systématiquement :
+
+**Expressions à bannir :**
+- Ouvertures génériques : « Dans le paysage actuel… », « À l'ère de… », « Dans un monde où… »
+- Adverbes et adjectifs surutilisés : crucial, essentiel, fondamental, indispensable, significatif, robuste, substantiel, notamment, particulièrement
+- Transitions mécaniques : « Il est important de noter que… », « Il convient de souligner que… »
+- Conclusions stéréotypées : « En conclusion, il ressort que… », « En somme… » en début de paragraphe final
+- Verbes passe-partout : « il s'agit de », « on peut noter que », « force est de constater »
+- Métaphores convenues : « plonger dans », « explorer », « naviguer » au sens figuré
+
+**Problèmes stylistiques à corriger :**
+- Phrases de longueur uniforme → varier les structures
+- Neutralité excessive → reformuler avec des affirmations claires
+- Structures syntaxiques répétitives → diversifier
+- Listes à puces dans les sections narratives → convertir en prose continue
+- Abus de tirets longs (—) → supprimer ou remplacer si non indispensables
+
+## Format de la réponse
+
+Structurer la réponse en deux parties distinctes, séparées par une ligne de séparation bien visible.
+
+### PARTIE 1 — TEXTE CORRIGÉ
+Produire la version intégralement corrigée du texte soumis. Appliquer les corrections directement, sans balises de suivi des modifications.
+
+### PARTIE 2 — RAPPORT DE CORRECTION
+
+**Problèmes structurels** (paragraphes pivots, organisation AIMRD)
+- Lister chaque problème identifié et la correction apportée
+
+**Problèmes au niveau des paragraphes** (phrase-topic, longueur, développement)
+- Lister chaque problème identifié et la correction apportée
+
+**Problèmes liés aux preuves et citations** (attribution, analyse manquante, verbes)
+- Lister chaque problème identifié et la correction apportée
+
+**Marqueurs IA supprimés** (expressions, tics stylistiques)
+- Lister chaque expression remplacée avec l'original et la version corrigée
+
+**Évaluation globale**
+- Points forts du texte original
+- Points nécessitant encore l'attention de l'auteur après correction`;
+
+function updateCount() {
+  const n = document.getElementById('input-text').value.length;
+  const el = document.getElementById('char-count');
+  el.textContent = n.toLocaleString() + (n <= 1 ? ' caractère' : ' caractères');
+}
+
+function clearAll() {
+  document.getElementById('input-text').value = '';
+  updateCount();
+  document.getElementById('result-area').classList.remove('visible');
+  document.getElementById('error').classList.remove('visible');
+  document.getElementById('status').style.display = 'none';
+}
+
+function toggleSection(id) {
+  const body = document.getElementById(id + '-body');
+  const chevron = document.getElementById('chevron-' + id);
+  body.classList.toggle('visible');
+  chevron.classList.toggle('open');
+}
+
+function copySection(e, id) {
+  e.stopPropagation();
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = e.target;
+    btn.textContent = 'Copié !';
+    setTimeout(() => btn.textContent = 'Copier', 1500);
+  });
+}
+
+async function submitText() {
+  const text = document.getElementById('input-text').value.trim();
+  if (!text) return;
+
+  const btn = document.getElementById('submit-btn');
+  const status = document.getElementById('status');
+  const statusText = document.getElementById('status-text');
+  const resultArea = document.getElementById('result-area');
+  const errorEl = document.getElementById('error');
+
+  btn.disabled = true;
+  status.style.display = 'flex';
+  statusText.textContent = 'Analyse du texte en cours…';
+  resultArea.classList.remove('visible');
+  errorEl.classList.remove('visible');
+
+  const messages = [
+    { role: 'user', content: `Voici le texte à corriger :\n\n${text}` }
+  ];
+
+  const phases = [
+    'Analyse structurelle…',
+    'Vérification des paragraphes…',
+    'Contrôle des preuves et citations…',
+    'Détection des marqueurs IA…',
+    'Rédaction du texte corrigé…',
+    'Rédaction du rapport…'
+  ];
+  let phaseIdx = 0;
+  const phaseInterval = setInterval(() => {
+    phaseIdx = (phaseIdx + 1) % phases.length;
+    statusText.textContent = phases[phaseIdx];
+  }, 3500);
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 8000,
+        system: SYSTEM_PROMPT,
+        messages
+      })
+    });
+
+    clearInterval(phaseInterval);
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || `Erreur API (${response.status})`);
+    }
+
+    const data = await response.json();
+    const fullText = data.content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+
+    const separators = [
+      /PARTIE\s*2\s*[—–-]\s*RAPPORT/i,
+      /RAPPORT DE CORRECTION/i,
+      /={3,}/,
+      /[-–—]{3,}/
+    ];
+
+    let corrected = fullText;
+    let report = '';
+
+    for (const sep of separators) {
+      const match = fullText.search(sep);
+      if (match > 100) {
+        corrected = fullText.slice(0, match).replace(/^PARTIE\s*1\s*[—–-]\s*TEXTE CORRIGÉ\s*/i, '').trim();
+        report = fullText.slice(match).trim();
+        break;
+      }
+    }
+
+    if (!report) {
+      const half = Math.floor(fullText.length / 2);
+      corrected = fullText.slice(0, half).trim();
+      report = fullText.slice(half).trim();
+    }
+
+    document.getElementById('corrected-body').textContent = corrected;
+    document.getElementById('report-body').textContent = report;
+
+    document.getElementById('corrected-body').classList.add('visible');
+    document.getElementById('report-body').classList.add('visible');
+    document.getElementById('chevron-corrected').classList.add('open');
+    document.getElementById('chevron-report').classList.add('open');
+
+    resultArea.classList.add('visible');
+    status.style.display = 'none';
+    resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch (err) {
+    clearInterval(phaseInterval);
+    status.style.display = 'none';
+    errorEl.textContent = 'Erreur : ' + err.message;
+    errorEl.classList.add('visible');
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
